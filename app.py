@@ -1,32 +1,32 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
-import os
 
-# Carregar dados
-df = pd.read_csv("dados.csv")
+def main():
+    st.title("Organizador de Grupos e Subgrupos")
 
-# Agrupar por 'Grupo'
-grupos = df['Grupo'].unique()
+    uploaded_file = st.file_uploader("Faça upload do arquivo CSV", type=["csv"])
 
-st.title("Análise de Testes de Liveness")
-st.markdown("Visualização dos grupos, subgrupos e descrições com imagens de exemplo.")
+    if uploaded_file is not None:
+        # Lê o arquivo CSV
+        df = pd.read_csv(uploaded_file)
 
-for grupo in grupos:
-    st.header(grupo)
+        # Mostra as primeiras linhas para verificar
+        st.write("Visualização dos dados:")
+        st.dataframe(df)
 
-    grupo_df = df[df['Grupo'] == grupo]
+        # Exemplo de agrupamento por "Grupo", "Subgrupo"
+        if "Grupo" in df.columns and "Subgrupo" in df.columns and "Descrição" in df.columns:
+            st.write("Dados organizados por grupo e subgrupo:")
 
-    for i, row in grupo_df.iterrows():
-        subgrupo = row['Subgrupo']
-        descricao = row['Descrição']
-
-        st.subheader(f"🔹 {subgrupo}")
-        st.write(descricao)
-
-        # Mostrar imagem se existir com o nome do subgrupo
-        imagem_path = f"imagens/{subgrupo.lower().replace(' ', '_')}.jpg"
-        if os.path.exists(imagem_path):
-            st.image(Image.open(imagem_path), caption=subgrupo)
+            # Agrupando e exibindo por grupo
+            grupos = df["Grupo"].unique()
+            for grupo in grupos:
+                st.subheader(f"Grupo: {grupo}")
+                subset = df[df["Grupo"] == grupo]
+                st.table(subset[["Subgrupo", "Descrição"]])
         else:
-            st.info("📷 Nenhuma imagem disponível para este item.")
+            st.warning("O arquivo CSV deve conter as colunas: Grupo, Subgrupo e Descrição.")
+
+if __name__ == "__main__":
+    main()
+
